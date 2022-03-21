@@ -1,0 +1,12 @@
+/guardant-ticket/target/
+/GrdApiJava/target/
+/vega2proxy/vega2proxy-web/target/
+/vega2proxy/vega2proxy-ejb/target/
+/cam-vega-driver/target/
+/vega-proto/target/
+/krm-itrium-bridge/krm-itrium-bridge-ejb/target/
+/krm-itrium-bridge/krm-itrium-bridge-web/target/
+/krm-itrium-bridge/krm-itrium-bridge-ear/target/
+/vega-proxy/target/
+/vega2-lic-gen/target/
+/krm-admin/target/

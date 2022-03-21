@@ -1,0 +1,145 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    <ui:composition template="/sec/templ-main.xhtml">
+        <ui:define name="html-head">
+            <title>КРМ</title>
+            <f:event type="javax.faces.event.PreRenderViewEvent" listener="#{mainBean.checkRedirect()}"/>
+            <style>
+                .ui-tabs-panels {
+                    height: 99%;
+                }
+                .ui-tabs .ui-tabs-panel {
+                    height: 99%;
+                }
+            </style>
+        </ui:define>
+        <ui:define name="title">КРМ</ui:define>
+        <ui:define name="center-panel">
+            <h:form id="formCenter" style="height: 90%">
+                <p:tabView id="tabView1" dynamic="true" cache="false" style="height: 99%">
+                    <!-- -->
+                    <p:tab title="#{vb.tr('Видео')}" >
+                        <table style="width: 99%;height: 99%;">
+                            <tr>
+                                <td style="vertical-align: middle;text-align: center;">
+                                    <object class="vlcPlayer" classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921" events="True">
+                                        <param name="Src" value="#{mainBean.rtsp2}" />
+                                        <!-- ie -->
+                                        <param name="ShowDisplay" value="false" />
+                                        <param name="AutoLoop" value="False" />
+                                        <param name="AutoPlay" value="True" />
+                                        <param name="Controls" value="False" />
+                                        <!-- win chrome and firefox-->
+                                        <embed id="vlcEmb1"  type="application/x-google-vlc-plugin"
+                                               version="VideoLAN.VLCPlugin.2" autoplay="yes" controls= "no" loop="no"
+                                               target="#{mainBean.rtsp2}" style="width: 640px;height: 480px;" />
+                                    </object>
+                                </td></tr>
+                            <tr><td style="text-align: left;vertical-align: bottom;">
+                                    <div class="panelTips">
+                                        <p>#{vb.tr("Вы можете использовать данную строку для подключения одного видеорегистратора:")}</p>
+                                        <p style="font-style: italic;font-weight: bold">#{mainBean.rtsp2}"</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </p:tab>
+
+                    <!-- -->
+                    <p:tab title="#{vb.tr('Распознавание')}" >
+                        <p:contextMenu for="tableRecogn" widgetVar="cMenu">   
+                            <p:menuitem value="Edit Cell" icon="ui-icon-search" onclick="PF('cellCars').showCellEditor();
+                                    return false;"/>  
+                            <p:menuitem value="Hide Menu" icon="ui-icon-close" onclick="PF('cMenu').hide()"/>  
+                        </p:contextMenu> 
+                        <p:dataTable id="tableRecogn" var="row" value="#{mainBean.recognProps}"
+                                     editable="true" editMode="cell" widgetVar="cellCars"
+                                     scrollable="true" scrollHeight="600">
+                            <p:column headerText="#{vb.tr('Параметр')}">
+                                <h:outputText value="#{row.descr}" />
+                            </p:column>
+                            <p:column headerText="#{vb.tr('Значение')}">
+                                <p:cellEditor>
+                                    <f:facet name="output"><h:outputText value="#{row.val}" /></f:facet>
+                                    <f:facet name="input"><p:inputText value="#{row.val}"/></f:facet>
+                                </p:cellEditor>
+                            </p:column>
+                        </p:dataTable>
+                        <p:panel style="text-align: right">
+                            <p:commandButton value="#{vb.tr('ОК')}" actionListener="#{mainBean.onOkRecognProp()}" />&nbsp;
+                            <p:commandButton value="#{vb.tr('Отмена/Обновить')}" actionListener="#{mainBean.onCancelRecognProp()}" />
+                        </p:panel>
+                    </p:tab>
+
+                    <p:tab title="#{vb.tr('Область')}" />
+                    <p:tab title="#{vb.tr('Листы')}" />
+
+                    <!-- -->
+                    <p:tab title="#{vb.tr('Настройки')}" >
+                        <script language="text/javascript">
+                            function getCurrDate() {
+                                var today = new Date();
+                                $('#formCenter\\:tabView1\\:inpDay').val(today.getDate());
+                                $('#formCenter\\:tabView1\\:inpMonth').val(today.getMonth() + 1);
+                                $('#formCenter\\:tabView1\\:inpYear').val(today.getFullYear());
+                                $('#formCenter\\:tabView1\\:inpHour').val(today.getHours());
+                                $('#formCenter\\:tabView1\\:inpMin').val(today.getMinutes());
+                                $('#formCenter\\:tabView1\\:inpSec').val(today.getSeconds());
+                            }
+                        </script>
+                        <p:panelGrid columns="1" style="width: 100%;" >
+                            <p:panel header="Время" >
+                                <table width="100%">
+                                    <tr style="padding: 2px;vertical-align: middle;"><td>
+                                            <h:outputText value="#{vb.tr('NTP сервер')}" />&nbsp;
+                                            <p:inputText value="#{mainBean.ntpServer}" size="20"/>
+                                        </td>
+                                        <td align="left"><p:commandButton value="#{vb.tr('Применить')}" 
+                                                                          actionListener="#{mainBean.onNtpOk()}" update=":formMessage:messages"/>&nbsp;
+                                            <p:commandButton value="#{vb.tr('Синхронизироваться')}"
+                                                             actionListener="#{mainBean.onNtpSync()}" update=":formMessage:messages"/>
+                                        </td></tr>
+                                    <tr style="padding: 2px;vertical-align: middle;"><td>
+                                            <h:outputText value="#{vb.tr('Час пояс')}" />&nbsp;
+                                            <p:selectOneMenu value="#{mainBean.tmz}" style="vertical-align: middle;">
+                                                <f:selectItems value="#{mainBean.tmzs}" var="r" itemLabel="#{r}" itemValue="#{r}"/>
+                                            </p:selectOneMenu>
+                                        </td>
+                                        <td align="left"><p:commandButton value="#{vb.tr('Применить')}" 
+                                                                          actionListener="#{mainBean.onTmzOk()}" update=":formMessage:messages"/>&nbsp;
+                                        </td></tr>
+                                    <tr style="padding: 2px;vertical-align: middle;"><td>
+                                            <h:outputText value="#{vb.tr('День')}" />&nbsp;
+                                            <p:inputText id="inpDay" value="#{mainBean.timeDay}" size="2" />&nbsp;&nbsp;
+                                            <h:outputText value="#{vb.tr('Мес')}" />&nbsp;
+                                            <p:inputText id="inpMonth" value="#{mainBean.timeMonth}" size="2"/>&nbsp;&nbsp;
+                                            <h:outputText value="#{vb.tr('Год')}" />&nbsp;
+                                            <p:inputText id="inpYear" value="#{mainBean.timeYear}" size="4"/>&nbsp;&nbsp;
+                                            <h:outputText value="#{vb.tr('Час')}" />&nbsp;
+                                            <p:inputText id="inpHour" value="#{mainBean.timeHour}" size="2"/>&nbsp;&nbsp;
+                                            <h:outputText value="#{vb.tr('Мин')}" />&nbsp;
+                                            <p:inputText id="inpMin" value="#{mainBean.timeMin}" size="2"/>&nbsp;&nbsp;
+                                            <h:outputText value="#{vb.tr('Сек')}" />&nbsp;
+                                            <p:inputText id="inpSec" value="#{mainBean.timeSec}" size="2"/>&nbsp;
+                                        </td><td align="left">
+                                            <p:commandButton value="#{vb.tr('Получить время клиента')}" onclick="getCurrDate();" type="button" />&nbsp;
+                                            <p:commandButton value="#{vb.tr('Применить')}" actionListener="#{mainBean.onTimeOk()}" update=":formMessage:messages" />
+                                        </td></tr>
+                                </table>
+                            </p:panel>
+                            <p:panel header="Хост" >
+                                2
+                            </p:panel>
+                        </p:panelGrid>
+                    </p:tab>
+                </p:tabView>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>
+

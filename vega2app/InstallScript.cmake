@@ -1,0 +1,6 @@
+EXECUTE_PROCESS(COMMAND chmod 0777 /etc/init.d/vega2app)
+EXECUTE_PROCESS(COMMAND sed -i -e 's/\r//g' /etc/init.d/vega2app)
+EXECUTE_PROCESS(COMMAND update-rc.d vega2app defaults)
+EXECUTE_PROCESS(COMMAND chmod 0777 /etc/init.d/vega-proxy-app)
+EXECUTE_PROCESS(COMMAND sed -i -e 's/\r//g' /etc/init.d/vega-proxy-app)
+EXECUTE_PROCESS(COMMAND update-rc.d vega-proxy-app defaults)

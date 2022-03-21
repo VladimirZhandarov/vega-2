@@ -1,0 +1,291 @@
+package wit.vegaproto.proto;
+
+message Body
+{	
+	// Идентификация камеры зафиксировавшей событие
+	required Camera Camera = 1; 
+	
+	// Дата и время фиксации в формате “дд.мм.гггг чч:мм:сс”
+	required DateAndTime Time = 2; 
+	
+	// Информация о распознанном ГРЗ
+	optional Plate Plate = 3; 
+	
+	// Фотографии ТС
+	repeated FixationFrame FixationFrames = 4; 
+	
+	// Дополнительные сведения о ТС
+	optional AdditionalParams AdditionalVehicleParams = 5; 
+	
+	// Причина фиксации
+	optional FixationReasons FixationReason = 6;
+}
+
+message Camera
+{
+	// Внутренний идентификатор СИТС
+	required uint32 Id = 1;
+	
+	// Канал – камера
+	required uint32 Channel = 2;
+	
+	// Географическая координата фиксации
+	optional Coordinate Location = 3;
+	
+	// Направление относительного движения трафика по отношению к камере:
+	// 1 – к камере
+	// 0 – от камеры
+	optional TrafficDirections TrafficDir = 4 [default = TrafficDirectionToCamera];
+	
+}
+
+// Направление относительного движения трафика по отношению к камере:
+enum TrafficDirections {
+	// 0 is reserved for errors
+	// 1 – к камере
+	TrafficDirectionToCamera = 1;
+	
+	// 2 – от камеры
+	TrafficDirectionFromCamera = 2;
+};
+
+message Coordinate
+{
+	// Долгота
+	required double Longitude = 1; 
+	
+	// Широта
+	required double Latitude = 2; 
+	
+	// Азимут
+	optional float Direction = 3; 
+}
+
+
+message Plate
+{
+	// Распознанный ГРЗ
+	required string PlateText = 1;
+	
+	// Код типа ГРЗ (п. 3)
+	required uint32 PlateType = 2;
+	
+	// Символы-кандидаты для каждой позиции
+	repeated Symbol Symbols = 3;
+	
+	// Степень загрязненности 0-100%
+	optional float Dirtiness = 4;
+	
+	// Степень достоверности распознования 0-100%
+	optional float Accuracy = 5;
+}
+
+// Символ-претендент
+message Symbol
+{
+	// Позиция символа
+	required uint32 Pos = 1;
+	
+	// Символ
+	required string Value = 2;
+	
+	// Вес символа
+	required uint32 Weight = 3;
+}
+
+message FixationFrame
+{
+	// Номер кадра
+	required uint32 Num = 1;
+	
+	// Флаг лучшего кадра
+	required bool IsBest = 2;
+	
+	// Полный кадр (JPG, PNG, BMP)
+	optional Photo Vehicle = 3;
+	
+	// Фотография ГРЗ (JPG, PNG, BMP)
+	optional Photo Plate = 4;
+	
+	// Панорамная фотография (JPG, PNG, BMP)
+	optional Photo Panorama = 5;
+}
+
+message Photo
+{
+	// Type кадра
+	required PhotoTypes Type = 1;
+	
+	// область тс в кадре
+	optional Rectangle Area = 2;
+	
+	// Фотография. Может отсутствовать при указании Area
+	optional Image Image = 3;
+}
+
+enum PhotoTypes {
+	// 0 is reserved for errors
+	
+	// Vehicle
+	PhotoTypeVehicle = 1;
+	
+	// ГРЗ
+	PhotoTypePlate = 2;
+	
+	// Panorama	
+	PhotoTypePanorama = 3;
+};
+  
+message Image
+{
+	required bytes Data = 1;
+	required ImageContainerTypes Type = 2 [default = ImageContainerTypeJPG];
+}
+
+// Тип изображения:
+enum ImageContainerTypes {
+	// 0 is reserved for errors	
+	ImageContainerTypeJPG = 1;
+	ImageContainerTypePNG = 2;
+	ImageContainerTypeBMP = 3;
+};
+
+message Rectangle
+{
+	// Координата по Y верхнего левого угла
+	required uint32 Top = 1;
+	
+	// Координата по X верхнего левого угла
+	required uint32 Left = 2;
+	
+	// Ширина
+	required uint32 Width = 3;
+	
+	// Высота
+	required uint32 Height = 4;
+}
+
+// Дополнительные параметры ТС
+message AdditionalParams
+{
+	// Скорость ТС (макс 250) в км/ч
+	optional uint32 Speed = 1; 
+    
+	// Способ определения скорости ТС:
+	// 1 – Радар	
+	// 2 – По видео ряду
+	optional SpeedTypes SpeedType = 2; 
+
+	// Направление движение ТС в кадре (градус 0-360)
+	optional uint32 DirInFrame = 3; 
+	
+	// Тип транспортного средства	
+	optional VehicleTypes VehicleType = 4;
+	
+	// Дополнительная информация
+	optional string CommonInfo = 5;
+	
+	// Нарушение ПДД
+	optional TrafficOffence TrafficViolation = 6;
+	
+	// Производитель ТС
+	optional uint32 VehicleMaker = 7;
+}
+
+message TrafficOffence
+{
+	// Тип нарушения
+	required TrafficOffenceTypes TrafficOffenceType = 1;
+	
+	// Пункт ПДД
+	optional string PDDPar = 2;
+	
+	// Статья КОАП
+	optional string KOAParticle = 3;
+	
+	// Описание
+	optional string Info = 4;
+}
+
+message DateAndTime
+{
+	required uint32 DayUTC = 1;
+	required uint32 MonthUTC = 2;
+	required uint32 YearUTC = 3;
+	required uint32 HourUTC = 4;
+	required uint32 MinuteUTC = 5;
+	required uint32 SecondUTC = 6;
+	required uint32 MillisecondUTC = 7;
+	required int32 OffsetFromUTCMinutes = 8;
+}
+
+// Способ определения скорости ТС:
+enum SpeedTypes {
+	// 0 is reserved for errors
+	// 1 – Радар	
+	SpeedTypeRadar = 1;
+	
+	// 2 – По видео ряду
+	SpeedTypeVideo = 2;
+};
+  
+// Причина фиксации
+enum FixationReasons {
+	// Проезд КЗ
+	FixationReasonPassing = 1;
+	
+	// Нарушение ПДД
+	FixationReasonViolation = 2;
+};
+  
+enum VehicleTypes {
+	// Мотоциклы
+	VehicleTypeMotorcycle = 1;
+	
+	// Легковой транспорт
+	VehicleTypeCar = 2;
+	
+	// Грузовой транспорт
+	VehicleTypeTruck = 3;
+	
+	// Автобусы
+	VehicleTypeBus = 4;
+	
+	// Автопоезд
+	VehicleTypeTrailer = 5;
+	
+	// Грузовик или автобус
+	VehicleTypeTruckOrBus = 6;
+};
+
+enum TrafficOffenceTypes {
+	// Превышение скорости 
+	TOT_SpeedLimit = 1;
+	
+	// Проезд на запрещающий сигнал светофора 
+	TOT_RedLight = 2;
+	
+	// Выезд на встречную полосу 
+	TOT_WrongDirection = 3;
+	
+	// Нарушение правил остановки или стоянки ТС на полосе для маршрутных ТС 
+	TOT_ParkingOffencePublicTransport = 4;
+	
+	// Нарушение правил остановки или стоянки ТС на проезжей части, где стоянка запрещена дорожными знаками или разметкой 
+	TOT_ParkingOffenceBySign = 5;
+	
+	// Нарушение правил остановки или стоянки ТС на тротуаре 
+	TOT_ParkingOffenceOnSidewalk = 6;
+	
+	// Движение транспортных средств по полосе для маршрутных транспортных средств 
+	TOT_PublicTransportLaneDriving = 7;
+	
+	// Езда без ремня безопасности 
+	TOT_NoSeatBelt = 8;
+	
+	// Не предоставление преимущества пешеходу 
+	TOT_NoPriorityPedestrian = 9;
+	
+	// Езда без ближнего света 
+	TOT_NoLightDriving = 10;
+};

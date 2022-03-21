@@ -1,0 +1,7 @@
+sudo chmod 0777 /etc/init.d/vega2app
+sudo sed -i -e 's/\r//g' /etc/init.d/vega2app
+sudo update-rc.d vega2app defaults
+
+sudo chmod 0777 /etc/init.d/vega-proxy-app
+sudo sed -i -e 's/\r//g' /etc/init.d/vega-proxy-app
+sudo update-rc.d vega-proxy-app defaults

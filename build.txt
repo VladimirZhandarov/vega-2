@@ -1,0 +1,214 @@
+﻿# remove ffmpeg x264.
+
+sudo apt-get remove ffmpeg x264 libx264-dev
+
+#install packege for ffmpeg and x264.
+
+sudo apt-get install build-essential checkinstall git cmake libfaac-dev libjack-jackd2-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libsdl1.2-dev libtheora-dev libva-dev libvdpau-dev libvorbis-dev libx11-dev libxfixes-dev libxvidcore-dev texi2html yasm zlib1g-dev
+
+#install gtk, boost
+
+sudo apt-get install libgtk2.0-0 libgtk2.0-dev
+sudo apt-get install libboost-all-dev
+
+
+wget http://www.ijg.org/files/jpegsrc.v8d.tar.gz
+tar xzf jpegsrc.v8d.tar.gz
+cd jpeg-8d
+./configure
+make
+sudo make install
+cd ..
+
+wget http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz
+tar xzvf yasm-1.2.0.tar.gz
+cd yasm-1.2.0
+./configure
+make
+sudo make install
+cd ..
+
+wget http://download.videolan.org/pub/x264/snapshots/x264-snapshot-20161115-2245-stable.tar.bz2
+tar xjvf x264-snapshot-20161115-2245-stable.tar.bz2
+cd x264-snapshot*
+./configure --enable-shared --enable-pic
+make
+sudo make install
+cd ..
+
+wget http://ffmpeg.org/releases/ffmpeg-2.2.tar.bz2
+tar xvf ffmpeg-2.2.tar.bz2
+cd ffmpeg-2.2
+./configure --enable-gpl --enable-libfaac --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-nonfree --enable-postproc --enable-version3 --enable-x11grab --enable-shared --enable-pic
+
+COPY vega-2/rtspdec.c TO ffmpeg-2.2/libavformat
+
+make
+sudo make install
+cd ..
+
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
+sudo ldconfig
+
+wget http://www.linuxtv.org/downloads/v4l-utils/v4l-utils-1.0.1.tar.bz2
+tar xvf v4l-utils-1.0.1.tar.bz2
+cd v4l-utils-1.0.1
+./configure
+make
+sudo make install
+cd ..
+
+sudo ldconfig
+
+wget http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.4.11/opencv-2.4.11.zip
+unzip opencv-2.4.11.zip
+cd opencv-2.4.11
+
+COPY vega-2/cap_ffmpeg_impl.hpp TO opencv-2.4.11/modules/highgui/src
+
+mkdir build
+cd build
+cmake -D BUILD_EXAMPLES=ON -D WITH_QT=OFF -D WITH_OPENGL=ON -D CMAKE_BUILD_TYPE=RELEASE -D WITH_GSTREAMER=OFF -D CMAKE_INSTALL_PREFIX=/usr ..
+make
+sudo make install
+cd ..
+cd ..
+
+wget https://www.openssl.org/source/openssl-1.0.1s.tar.gz
+tar xzvf openssl-1.0.1s.tar.gz
+cd openssl-1.0.1s
+./config
+make depend
+make
+sudo make install
+cd ..
+
+export PATH=${PATH}:/usr/local/lib
+sudo cp ./iANPR1.4/x86/libianpr1.4.so /usr/lib
+
+
+#build libmcp23s17 and libpifacedigital (для работы с реле а АРМ)
+cd libmcp23s17
+make
+sudo make install
+
+cd libpifacedigital
+make
+sudo make install
+
+#build lib
+cd vega2lib
+
+!!!!!!! Для сборки c libGPIOd необходимо добавить ключ USE_GPIOD
+Пример:
+cmake -DNO_AES=ON -DUSE_GPIOD=ON -G 'Unix Makefiles'
+
+!!!!!!! Для сборки c MongoDB необходимо добавить ключ USE_MONGODB
+Пример:
+cmake -DNO_AES=ON -DUSE_MONGODB=ON -G 'Unix Makefiles'
+
+!!!! Для сборки с ключем AES
+cmake -DNO_GUARDANT=ON -G 'Unix Makefiles'
+
+!!!! Для сборки с Guardant
+cmake -DNO_AES=ON -G 'Unix Makefiles'
+
+!!! Эта сборка будет проверять и AES и Guardant
+cmake -G 'Unix Makefiles'
+
+!!!!!!!! Эта сборка НЕ ИМЕЕТ ЗАЩИТЫ
+cmake -DNO_AES=ON -DNO_GUARDANT=ON -G 'Unix Makefiles'
+
+make
+
+#build app
+cd vega2app
+
+!!!!!!! Для сборки c libGPIOd необходимо добавить ключ USE_GPIOD
+Пример:
+cmake -DNO_AES=ON -DUSE_GPIOD=ON -G 'Unix Makefiles'
+
+!!!!!!! Для сборки c MongoDB необходимо добавить ключ USE_MONGODB
+Пример:
+cmake -DNO_AES=ON -DUSE_MONGODB=ON -G 'Unix Makefiles'
+
+!!!! Для сборки с ключем AES
+cmake -DNO_GUARDANT=ON -G 'Unix Makefiles'
+
+!!!! Для сборки с Guardant
+cmake -DNO_AES=ON -G 'Unix Makefiles'
+
+!!! Эта сборка будет проверять и AES и Guardant
+cmake -G 'Unix Makefiles'
+
+!!!!!!!! Эта сборка НЕ ИМЕЕТ ЗАЩИТЫ
+cmake -DNO_AES=ON -DNO_GUARDANT=ON -G 'Unix Makefiles'
+
+make
+
+#make install
+sudo make install
+
+!!!! Для Guardant в linux необходимо установить драйвер (правка кодировки)
+cd guardantlib/etc
+sed -i -e 's/\r//g' 95-grdnt.rules
+sed -i -e 's/\r//g' grdnt-install.sh
+sudo grdnt-install.sh
+Перегрузить компьютер
+
+
+#run app in daemon
+cd bin
+sudo ./vega2app
+
+#run app on daemon
+cd bin
+sudo ./vega2app --no-daemon
+
+#make deb package
+cd vega2app
+make package
+
+#install deb package
+cd vega2app
+sudo dpkg -i vega2app-0.7.11-Linux.deb
+sudo chmod 0777 /etc/init.d/vega2app
+sudo update-rc.d vega2app defaults
+
+#build qt app
+sudo apt-get install qtcreator
+sudo apt-get install libqt4-core libqt4-dev libqt4-gui qt4-dev-tools
+
+export QT_SELECT=4
+qmake
+make
+
+sudo apt-get install mongodb
+sudo apt-get install libmongoc-1.0-0
+sudo apt-get install libmongoc-dev
+sudo apt-get install libbson-dev
+
+sudo rm mongod.lock ???
+sudo service mongodb start
+
+
+sudo cat mongodb.service
+[Unit]
+Description=High-performance, schema-free document-oriented database
+After=network.target
+
+[Service]
+User=mongodb
+ExecStart=/usr/bin/mongod --quiet --config /etc/mongodb.conf
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl daemon-reload
+sudo chown -R mongodb:mongodb /var/lib/mongodb
+
+$ sudo rm /var/lib/mongodb/mongod.lock
+$ sudo mongod -f /etc/mongodb.conf --repair
+$ sudo start mongodb
+$ sudo status mongodb

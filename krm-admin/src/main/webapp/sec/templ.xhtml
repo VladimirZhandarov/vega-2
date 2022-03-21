@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <ui:insert name="html-head"></ui:insert>
+        <link rel="stylesheet" type="text/css" href="/krm-res/css/style-krm.css" />
+    </h:head>
+    <h:body>
+        <h:form id="formMessage" >
+            <p:growl id="messages" showDetail="true"/>
+        </h:form>
+        <p:layout fullPage="true">
+            <p:layoutUnit id="pageHeader" position="north" size="35">
+                <h:panelGrid id="panelHeader" columns="1" styleClass="mainHeader">
+                    <ui:insert name="title" />
+                </h:panelGrid>
+            </p:layoutUnit>
+            <p:layoutUnit id="pageFooter" position="south" size="35">
+                <h:panelGrid id="panelFooter" columns="2" styleClass="mainFooter">
+                    <h:outputText value="${vb.firmName} ${vb.programName} v.${vb.programVers}"/>
+                </h:panelGrid>
+            </p:layoutUnit>
+            <p:layoutUnit id="center" position="center">
+                <ui:insert name="center-panel" />
+            </p:layoutUnit>
+        </p:layout>
+    </h:body>
+</html>
+
